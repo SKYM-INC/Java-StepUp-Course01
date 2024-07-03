@@ -1,1 +1,1 @@
-# Java-StepUp-Course01
+# 初期設定とリファクタリング
