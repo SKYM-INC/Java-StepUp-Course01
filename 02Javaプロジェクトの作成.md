@@ -1,0 +1,185 @@
+### WSL上でのJavaプロジェクトの作成
+
+**目標**: WSL上でJavaを使用して基本的なToDoアプリを作成
+
+**前提条件**:
+- WSL2がインストールされ、セットアップが完了している
+- Java開発環境がWSL上にセットアップされている
+- IntelliJ IDEAがインストールされている
+
+**内容**:
+
+### 1. 新規プロジェクトの作成手順
+
+#### IntelliJ IDEAの起動
+
+1. **IntelliJ IDEAの起動**
+   - Windows側でIntelliJ IDEAを起動します。デスクトップにあるIntelliJ IDEAのアイコンをダブルクリックするか、スタートメニューから検索して起動します。
+
+2. **"New Project"をクリック**
+   - 起動画面に表示される「Welcome to IntelliJ IDEA」ウィンドウで「New Project」をクリックします。
+
+#### プロジェクトの設定
+
+1. **Project SDKの設定**
+   - "Project SDK"を選択し、インストールしたJava SDKを指定します。SDKドロップダウンリストから使用するJavaのバージョンを選択します。まだSDKが設定されていない場合は、「Add JDK」をクリックし、JDKのインストールパスを指定します。
+
+2. **追加ライブラリとフレームワークの設定**
+   - "Additional Libraries and Frameworks"のチェックボックスを全てオフにして「Next」をクリックします。ここでは追加のライブラリやフレームワークは使用しないため、全てのチェックボックスをオフにします。
+
+3. **プロジェクト名と保存場所の設定**
+   - "Project Name"にプロジェクトの名前を入力し、"Project Location"にプロジェクトを保存するディレクトリを指定します。例えば、"Project Name"に「ToDoApp」、"Project Location"に「\\wsl$\Ubuntu-20.04\home\yourusername\IdeaProjects\ToDoApp」と入力します。
+
+4. **プロジェクトの作成**
+   - 「Finish」をクリックしてプロジェクトを作成します。これで新しいJavaプロジェクトが作成されます。
+
+### 2. 基本的な設定ファイルの準備
+
+#### Gradleの設定 (オプション)
+
+Gradleは、プロジェクトのビルド、テスト、デプロイなどのプロセスを自動化するためのビルドツールです。これを使用すると、プロジェクトの依存関係管理やビルド手順を簡素化できます。
+
+1. **`build.gradle`ファイルの作成**
+   - プロジェクトのルートディレクトリに`build.gradle`ファイルを作成します。IntelliJ IDEAのプロジェクトツールウィンドウで、プロジェクトのルートディレクトリを右クリックし、「New」→「File」を選択して`build.gradle`と命名します。
+
+2. **`build.gradle`の内容**
+   - 以下の内容を`build.gradle`に記述します。
+     ```gradle
+     plugins {
+         id 'java'
+     }
+
+     group 'com.skym-inc'
+     version '1.0-SNAPSHOT'
+
+     repositories {
+         mavenCentral()
+     }
+
+     dependencies {
+         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+     }
+
+     test {
+         useJUnitPlatform()
+     }
+     ```
+     - **pluginsセクション**: プロジェクトに適用するプラグインを定義します。ここでは`id 'java'`を使用してJavaプラグインを適用し、Javaプロジェクトとして設定しています。
+     - **group**: プロジェクトのグループIDを指定します。これは通常、会社のドメイン名を逆にしたものを使用します（例: `com.skym-inc`）。
+     - **version**: プロジェクトのバージョンを指定します。ここでは`1.0-SNAPSHOT`を使用しています。`SNAPSHOT`は開発中のバージョンを示します。
+     - **repositoriesセクション**: 依存関係を解決するためのリポジトリを指定します。ここでは`mavenCentral()`を使用して、Maven Centralリポジトリから依存関係を取得します。
+     - **dependenciesセクション**: プロジェクトが依存するライブラリを指定します。ここではJUnit 5をテストフレームワークとして使用するための依存関係を追加しています。`testImplementation`はテストコンパイル時に必要なライブラリ、`testRuntimeOnly`はテスト実行時にのみ必要なライブラリを示します。
+     - **testセクション**: テストプラットフォームの設定を行います。ここではJUnitプラットフォームを使用するように設定しています。
+
+#### Mavenの設定 (オプション)
+
+MavenもGradle同様にプロジェクトのビルド、依存関係管理、デプロイなどを自動化するためのビルドツールです。MavenはXML形式の設定ファイル（`pom.xml`）を使用してプロジェクトの構成を定義します。
+
+1. **`pom.xml`ファイルの作成**
+   - プロジェクトのルートディレクトリに`pom.xml`ファイルを作成します。IntelliJ IDEAのプロジェクトツールウィンドウで、プロジェクトのルートディレクトリを右クリックし、「New」→「File」を選択して`pom.xml`と命名します。
+
+2. **`pom.xml`の内容**
+   - 以下の内容を`pom.xml`に記述します。
+     ```xml
+     <project xmlns="http://maven.apache.org/POM/4.0.0"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         <modelVersion>4.0.0</modelVersion>
+         <groupId>com.skym-inc</groupId>
+         <artifactId>todo-app</artifactId>
+         <version>1.0-SNAPSHOT</version>
+
+         <dependencies>
+             <dependency>
+                 <groupId>org.junit.jupiter</groupId>
+                 <artifactId>junit-jupiter-api</artifactId>
+                 <version>5.7.0</version>
+                 <scope>test</scope>
+             </dependency>
+             <dependency>
+                 <groupId>org.junit.jupiter</groupId>
+                 <artifactId>junit-jupiter-engine</artifactId>
+                 <version>5.7.0</version>
+                 <scope>test</scope>
+             </dependency>
+         </dependencies>
+
+         <build>
+             <plugins>
+                 <plugin>
+                     <groupId>org.apache.maven.plugins</groupId>
+                     <artifactId>maven-compiler-plugin</artifactId>
+                     <version>3.8.1</version>
+                     <configuration>
+                         <source>1.8</source>
+                         <target>1.8</target>
+                     </configuration>
+                 </plugin>
+             </plugins>
+         </build>
+     </project>
+     ```
+     - **project要素**: Mavenプロジェクトのルート要素であり、プロジェクトのすべての設定を含みます。
+     - **modelVersion**: POMのモデルバージョンを指定します。通常は`4.0.0`を使用します。
+     - **groupId**: プロジェクトのグループIDを指定します。これは通常、会社のドメイン名を逆にしたものを使用します（例: `com.skym-inc`）。
+     - **artifactId**: プロジェクトのアーティファクトID（名前）を指定します。ここでは`todo-app`を使用しています。
+     - **version**: プロジェクトのバージョンを指定します。ここでは`1.0-SNAPSHOT`を使用しています。
+     - **dependencies要素**: プロジェクトが依存するライブラリを指定します。ここではJUnit 5をテストフレームワークとして使用するための依存関係を追加しています。
+         - **dependency要素**: 依存ライブラリを指定します。`groupId`はライブラリのグループID、`artifactId`はライブラリのアーティファクトID、`version`はライブラリのバージョンを示します。`scope`は依存ライブラリの適用範囲を指定し、`test`はテスト時にのみ使用することを示します。
+     - **build要素**: プロジェクトのビルド設定を指定します。
+         - **plugins要素**: プロジェクトに適用するプラグインを指定します。
+             - **plugin要素**: プラグインを指定します。`groupId`はプラグインのグループID、`artifactId`はプラグインのアーティファクトID、`version`はプラグインのバージョンを示します。
+             - **configuration要素**: プラグインの設定を指定します。ここではJavaコンパイラのソースバージョンとターゲットバージョンを指定しています（例: `1.8`はJava 8を示します）。
+
+これらの設定ファイルを作成することで、プロジェクトのビルドと依存関係管理を自動化し、開発環境を効率化することができます。GradleとMavenのどちらを選択するかは、プロジェクトの要件や開発チームの好みによります。
+
+### 3. ToDoアプリの基本実装
+
+#### メインクラスの作成
+
+1. **`Main.java`ファイルの作成**
+   - プロジェクトの`src`ディレクトリ内に`Main.java`ファイルを作成します。IntelliJ IDEAのプロジェクトツールウィンドウで、`src`ディレクトリを右クリックし、「New」→「Java Class」を選択し、`Main`と命名します。
+
+2. **`Main.java`の内容**
+   - 以下の内容を`Main.java`に記述します。
+     ```java
+     public class Main {
+         public static void main(String[] args) {
+             System.out.println("Welcome to the ToDo App!");
+         }
+     }
+     ```
+     - これは基本的なJavaプログラムであり、`main`メソッドがプログラムのエントリーポイントとなります。`System.out.println`はコンソールにメッセージを表示するためのメソッドです。
+
+#### ToDoクラスの作成
+
+1. **`ToDo.java`ファイルの作成**
+   - `Main.java`と同じディレクトリに`ToDo.java`ファイルを作成します。IntelliJ IDEAのプロジェクトツールウィンドウで、`src`ディレクトリを右クリックし、「New」→「Java Class」を選択し、`ToDo`と命名します。
+
+2. **`ToDo.java`の内容**
+   - 以下の内容を`ToDo.java`に記述します。
+     ```java
+     public class ToDo {
+         private String task;
+         private boolean isCompleted;
+
+         public ToDo(String task) {
+             this.task = task;
+             this.isCompleted = false;
+         }
+
+         public String getTask() {
+             return task;
+         }
+
+         public boolean isCompleted() {
+             return isCompleted;
+         }
+
+         public void completeTask() {
+             isCompleted = true;
+         }
+     }
+     ```
+     - このクラスは、タスクの内容とその完了状態を管理するためのクラスです。`task`はタスクの内容を表し、`isCompleted`はタスクが完了したかどうかを示すブール値です。`ToDo`クラスにはタスクを取得するための`getTask`メソッド、タスクの完了状態を取得するための`isCompleted`メソッド、およびタスクを完了に設定するための`completeTask`メソッドがあります。
